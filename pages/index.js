@@ -47,7 +47,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    document.title = 'Alamis URL Shrinker'
+    document.title = 'Alamis URL Shortener'
     document.querySelector("#url-to-shrink").onkeydown = (e) => {
       if (e.keyCode === 13) {
         shrinkUrl();
