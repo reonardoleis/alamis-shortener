@@ -60,7 +60,7 @@ export default function Home() {
       <Segment padded basic>
         <Header as="h2" icon color="pink" size="huge">
           <Icon name="user secret" />
-          URL Shrinker
+          URL Shortener
         </Header>
         <br></br>
         <Input
