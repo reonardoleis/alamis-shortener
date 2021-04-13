@@ -1,65 +1,94 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Container,
+  Header,
+  HeaderContent,
+  Icon,
+  Input,
+  Segment,
+} from "semantic-ui-react";
+
+function validURL(string) {
+  let url;
+
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+}
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [shrinkedUrl, setShrinkedUrl] = useState("");
+  const axios = require("axios");
+
+  const shrinkUrl = async () => {
+    setLoading(true);
+    let urlToShrink = document.querySelector("#url-to-shrink").value;
+    if (!validURL(urlToShrink)) {
+      setLoading(false);
+      return alert("Invalid URL.");
+    }
+    axios
+      .post("./api/shrink", {
+        url: urlToShrink,
+      })
+      .then((res) => {
+        setShrinkedUrl(window.location.href + res.data.hash);
+        console.log(res.data);
+      });
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    document.title = 'Alamis URL Shrinker'
+    document.querySelector("#url-to-shrink").onkeydown = (e) => {
+      if (e.keyCode === 13) {
+        shrinkUrl();
+      }
+    };
+  }, []);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    <Container textAlign="center">
+      <Segment padded basic>
+        <Header as="h2" icon color="pink" size="huge">
+          <Icon name="user secret" />
+          URL Shrinker
+        </Header>
+        <br></br>
+        <Input
+          loading={loading}
+          id="url-to-shrink"
+          icon={{
+            name: "search",
+            circular: true,
+            link: true,
+            onClick: shrinkUrl,
+          }}
+          placeholder="https://example.com"
+        />
+      </Segment>
+      {!loading && shrinkedUrl !== "" ? (
+        <Card centered>
+          <Card.Content>
+            <Card.Header>
+              <Icon name="globe" /> Shrinked URL
+            </Card.Header>
+            <Card.Description>
+              <a href={shrinkedUrl}>{shrinkedUrl}</a>
+            </Card.Description>
+          </Card.Content>
+        </Card>
+      ) : (
+        ""
+      )}
+    </Container>
+  );
 }
